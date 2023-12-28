@@ -9,9 +9,9 @@ public class MoveOriginImage
 {
     [FunctionName("MoveOriginImage")]
     public async Task Run(
-        [TimerTrigger("0 30 9 * * *",
+        [TimerTrigger("0 30 9 * * *"
 #if DEBUG
-        RunOnStartup=true
+        , RunOnStartup=true
 #endif
         )] TimerInfo timer, ILogger log)
     {
