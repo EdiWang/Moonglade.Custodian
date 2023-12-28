@@ -8,8 +8,23 @@ namespace Moonglade.Custodian;
 public class MoveOriginImage
 {
     [FunctionName("MoveOriginImage")]
-    public void Run([TimerTrigger("0 30 9 * * *")]TimerInfo timer, ILogger log)
+    public void Run([TimerTrigger("0 30 9 * * *")] TimerInfo timer, ILogger log)
     {
-        log.LogInformation($"C# Timer trigger function executed at: {DateTime.UtcNow} UTC");
+        log.LogInformation($"MoveOriginImage Timer trigger function executed at: {DateTime.UtcNow} UTC");
+
+        var connStr = Environment.GetEnvironmentVariable("STORAGE_CONNSTR");
+        var containerName = Environment.GetEnvironmentVariable("SOURCE_CONTAINER");
+        var originContainerName = Environment.GetEnvironmentVariable("DEST_CONTAINER");
+
+        // Check above variables are set
+        if (string.IsNullOrWhiteSpace(connStr) ||
+            string.IsNullOrWhiteSpace(containerName) ||
+            string.IsNullOrWhiteSpace(originContainerName))
+        {
+            log.LogError("Required environment variables are not set.");
+            throw new InvalidOperationException("Required environment variables are not set.");
+        }
+
+
     }
 }
