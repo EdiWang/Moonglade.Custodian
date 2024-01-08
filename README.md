@@ -1,6 +1,6 @@
 # Moonglade.Custodian
 
-Azure Function for Moonglade that do maintenance work
+Azure Function for [Moonglade](https://github.com/EdiWang/Moonglade) that do maintenance work
 
 ## Configuration
 
