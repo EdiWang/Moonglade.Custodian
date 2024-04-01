@@ -1,21 +1,21 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
 namespace Moonglade.Custodian;
 
-public class MoveOriginImage
+public class MoveOriginImage(ILogger<MoveOriginImage> logger)
 {
-    [FunctionName("MoveOriginImage")]
+    [Function("MoveOriginImage")]
     public async Task Run(
         [TimerTrigger("0 30 9 * * *"
 #if DEBUG
         , RunOnStartup=true
 #endif
-        )] TimerInfo timer, ILogger log)
+        )] TimerInfo timer)
     {
-        log.LogInformation($"MoveOriginImage Timer trigger function executed at: {DateTime.UtcNow} UTC");
+        logger.LogInformation($"MoveOriginImage Timer trigger function executed at: {DateTime.UtcNow} UTC");
 
         var connStr = Environment.GetEnvironmentVariable("STORAGE_CONNSTR");
         var containerName = Environment.GetEnvironmentVariable("SOURCE_CONTAINER");
@@ -26,7 +26,7 @@ public class MoveOriginImage
             string.IsNullOrWhiteSpace(containerName) ||
             string.IsNullOrWhiteSpace(originContainerName))
         {
-            log.LogError("Required environment variables are not set.");
+            logger.LogError("Required environment variables are not set.");
             throw new InvalidOperationException("Required environment variables are not set.");
         }
 
@@ -34,7 +34,7 @@ public class MoveOriginImage
         var sourceContainer = GetBlobContainer(connStr, containerName);
         var sourceFiles = new List<BlobItem>();
 
-        log.LogInformation($"Fetch files on source container '{containerName}'");
+        logger.LogInformation($"Fetch files on source container '{containerName}'");
         await foreach (var blobItem in sourceContainer.GetBlobsAsync())
         {
             sourceFiles.Add(blobItem);
@@ -43,8 +43,8 @@ public class MoveOriginImage
         // Identify origin images
         var originImageBlobs = sourceFiles.Where(f => f.Name.Contains("-origin.")).ToList();
 
-        log.LogInformation($"{sourceFiles.Count} file{(sourceFiles.Count > 0 ? "s" : string.Empty)} in source container '{containerName}'.");
-        log.LogInformation($"{originImageBlobs.Count} file{(originImageBlobs.Count > 0 ? "s are" : " is ")} identified as origin image{(originImageBlobs.Count > 0 ? "s" : string.Empty)}.");
+        logger.LogInformation($"{sourceFiles.Count} file{(sourceFiles.Count > 0 ? "s" : string.Empty)} in source container '{containerName}'.");
+        logger.LogInformation($"{originImageBlobs.Count} file{(originImageBlobs.Count > 0 ? "s are" : " is ")} identified as origin image{(originImageBlobs.Count > 0 ? "s" : string.Empty)}.");
 
         if (originImageBlobs.Count == 0) return;
 
@@ -57,7 +57,7 @@ public class MoveOriginImage
 
         foreach (var blob in originImageBlobs)
         {
-            log.LogInformation($"Moving '{blob.Name}'.");
+            logger.LogInformation($"Moving '{blob.Name}'.");
 
             var blobClient = sourceContainer.GetBlobClient(blob.Name);
             var targetBlobClient = targetContainer.GetBlobClient(blob.Name);
@@ -70,16 +70,16 @@ public class MoveOriginImage
 
                 succeeded++;
 
-                log.LogInformation($"Moved '{blob.Name}'.");
+                logger.LogInformation($"Moved '{blob.Name}'.");
             }
             catch (Exception ex)
             {
-                log.LogError(ex, $"Failed to move blob '{blob.Name}' to target container '{originContainerName}'.");
+                logger.LogError(ex, $"Failed to move blob '{blob.Name}' to target container '{originContainerName}'.");
                 failed++;
             }
         }
 
-        log.LogInformation($"Operation completed. {succeeded} succeeded, {failed} failed.");
+        logger.LogInformation($"Operation completed. {succeeded} succeeded, {failed} failed.");
     }
 
     private static BlobContainerClient GetBlobContainer(string conn, string name)

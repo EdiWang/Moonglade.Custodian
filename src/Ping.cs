@@ -1,19 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Moonglade.Custodian;
 
-public static class Ping
+public class Ping(ILogger<Ping> logger)
 {
-    [FunctionName("Ping")]
-    public static IActionResult Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
-        ILogger log)
+    [Function("Ping")]
+    public IActionResult Run(
+        [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req)
     {
-        log.LogInformation("Ping HTTP trigger function processed a request.");
+        logger.LogInformation("Ping HTTP trigger function processed a request.");
         return new OkObjectResult("Hello");
     }
 }
