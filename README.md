@@ -2,6 +2,8 @@
 
 Azure Function for [Moonglade](https://github.com/EdiWang/Moonglade) that do maintenance work
 
+> Starting from Moonglade v14.19.0, this project is no longer needed. The function is integrated into Moonglade project. This repo is archived.
+
 ## Configuration
 
 ### Environment Variables
