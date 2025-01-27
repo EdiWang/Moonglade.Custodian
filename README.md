@@ -20,8 +20,3 @@ Move origin image (without watermark) from public image container to desired con
 
 ![Snipaste_2023-12-28_10-49-54](https://github.com/EdiWang/Moonglade.Custodian/assets/3304703/4045e200-9059-4323-9e61-ba141d94fb3d)
 
-## 免责申明
-
-对于中国访客，我们有一份特定的免责申明。请确保你已经阅读并理解其内容：
-
-- [免责申明（仅限中国访客）](./DISCLAIMER_CN.md)
